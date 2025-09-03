@@ -1,0 +1,43 @@
+name: Upload dataset to Kaggle
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - pypi-packages-typing.csv
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Kaggle CLI
+        run: |
+          pip install kaggle
+
+      - name: Configure Kaggle credentials
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          mkdir -p ~/.kaggle
+          echo "{\"username\":\"${{ KAGGLE_USERNAME }}\",\"key\":\"${{ KAGGLE_KEY }}\"}" > ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
+
+      - name: Upload dataset
+        run: |
+          mkdir -p ~/tmp
+          echo "{\"title\":\"PyPI Typing\",\"id\":\"donbarbos/pypi-typing\"}" > ~/tmp/dataset-metadata.json
+          cp pypi-packages-typing.csv ~/tmp
+          kaggle datasets version -p ~/tmp -m "Update $(date +'%Y-%m-%d')"

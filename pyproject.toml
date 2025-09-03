@@ -1,0 +1,13 @@
+[project]
+name = "pypi-typing"
+version = "0.1.0"
+description = "Dataset typing information for PyPI packages"
+readme = "README.md"
+authors = [
+    {name = "donBarbos", email = "donbarbos@proton.me"},
+]
+requires-python = ">=3.13"
+package-mode = false
+dependencies = [
+    "aiohttp>=3.12.15",
+]

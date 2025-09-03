@@ -1,0 +1,38 @@
+name: Create release
+
+on:
+  push:
+    tags:
+      - '[0-9]+\.[0-9]+\.[0-9]+'   # YYYY.MM.DD
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Get the version
+        id: get_version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Count projects
+        id: count_projects
+        run: |
+          COUNT=$(($(wc -l < pypi-packages-typing.csv) - 1))
+          echo "COUNT=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            Number of projects included in this dataset: ${{ steps.count_projects.outputs.COUNT }}
+          files: |
+            pypi-packages-typing.csv
